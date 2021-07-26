@@ -16,6 +16,8 @@ import datetime
 
 from flask import Flask, render_template
 
+from get import get
+
 # [START gae_python38_datastore_store_and_fetch_times]
 # [START gae_python3_datastore_store_and_fetch_times]
 from google.cloud import datastore
@@ -53,6 +55,7 @@ def fetch_times(limit):
 # [START gae_python3_datastore_render_times]
 @app.route('/')
 def root():
+    get('root')
     # Store the current access time in Datastore.
     store_time(datetime.datetime.now())
 
