@@ -12,60 +12,61 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import datetime
+from flask import Flask, request, jsonify
+from entry import *
 
-from flask import Flask, render_template
 
-from get import get
-
-# [START gae_python38_datastore_store_and_fetch_times]
-# [START gae_python3_datastore_store_and_fetch_times]
-from google.cloud import datastore
-
-datastore_client = datastore.Client()
-
-# [END gae_python3_datastore_store_and_fetch_times]
-# [END gae_python38_datastore_store_and_fetch_times]
 app = Flask(__name__)
 
 
-# [START gae_python38_datastore_store_and_fetch_times]
-# [START gae_python3_datastore_store_and_fetch_times]
-def store_time(dt):
-    entity = datastore.Entity(key=datastore_client.key('visit'))
-    entity.update({
-        'timestamp': dt
-    })
-
-    datastore_client.put(entity)
-
-
-def fetch_times(limit):
-    query = datastore_client.query(kind='visit')
-    query.order = ['-timestamp']
-
-    times = query.fetch(limit=limit)
-
-    return times
-# [END gae_python3_datastore_store_and_fetch_times]
-# [END gae_python38_datastore_store_and_fetch_times]
+@app.route('/get')
+def get():
+    name = request.args.get('name')
+    result = get_entry(name)
+    if result is not None:
+        return jsonify(result.value)
+    else:
+        return jsonify('None')
 
 
-# [START gae_python38_datastore_render_times]
-# [START gae_python3_datastore_render_times]
-@app.route('/')
-def root():
-    get('root')
-    # Store the current access time in Datastore.
-    store_time(datetime.datetime.now())
+@app.route('/set')
+def set():
+    name = request.args.get('name')
+    value = request.args.get('value')
+    try:
+        set_entry(name, value)
+    except:
+        return jsonify('some error occurred')
+    else:
+        return jsonify({name: value})
 
-    # Fetch the most recent 10 access times from Datastore.
-    times = fetch_times(10)
 
-    return render_template(
-        'index.html', times=times)
-# [END gae_python3_datastore_render_times]
-# [END gae_python38_datastore_render_times]
+@app.route('/unset')
+def unset():
+    name = request.args.get('name')
+    try:
+        unset_entry(name)
+    except:
+        return jsonify('some error occurred')
+    else:
+        return jsonify({name: None})
+
+
+@app.route('/numequalto')
+def numequalto():
+    value = request.args.get('value')
+    result = num_equal_to(value)
+    return jsonify(result)
+    # try:
+    # except:
+    #     return jsonify('some error occurred')
+    # else:
+
+
+@app.route('/end')
+def end():
+    clean()
+    return jsonify('CLEANED')
 
 
 if __name__ == '__main__':
