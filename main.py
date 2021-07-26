@@ -23,8 +23,9 @@ app = Flask(__name__)
 def get():
     name = request.args.get('name')
     result = get_entry(name)
-    if result is not None:
-        return jsonify(result.value)
+    print(result)
+    if result is not None and result['value'] is not None:
+        return jsonify(result['value'])
     else:
         return jsonify('None')
 
