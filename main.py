@@ -1,9 +1,15 @@
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, make_response
 from entry import *
 
 
 app = Flask(__name__)
+
+
+def response(string):
+    response = make_response(string, 200)
+    response.mimetype = "text/plain"
+    return response
 
 
 @app.route('/get')
@@ -12,9 +18,9 @@ def get():
     result = get_entry(name)
     print(result)
     if result is not None and result['value'] is not None:
-        return jsonify(result['value'])
+        return response(str(result['value']))
     else:
-        return jsonify('None')
+        return response('None')
 
 
 @app.route('/set')
@@ -24,9 +30,9 @@ def set():
     try:
         set_entry(name, value)
     except:
-        return jsonify('some error occurred')
+        return response('some error occurred')
     else:
-        return jsonify({name: value})
+        return response(str(name) + ' = ' + str(value))
 
 
 @app.route('/unset')
@@ -35,26 +41,22 @@ def unset():
     try:
         unset_entry(name)
     except:
-        return jsonify('some error occurred')
+        return response('some error occurred')
     else:
-        return jsonify({name: None})
+        return response(str(name) + ' = ' + str(None))
 
 
 @app.route('/numequalto')
 def numequalto():
     value = request.args.get('value')
     result = num_equal_to(value)
-    return jsonify(result)
-    # try:
-    # except:
-    #     return jsonify('some error occurred')
-    # else:
+    return response(str(result))
 
 
 @app.route('/end')
 def end():
     clean()
-    return jsonify('CLEANED')
+    return response('CLEANED')
 
 
 if __name__ == '__main__':
