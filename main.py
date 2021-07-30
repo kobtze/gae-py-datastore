@@ -68,6 +68,15 @@ def end():
     clean()
     return response('CLEANED')
 
+@app.route('/undo')
+def on_undo():
+    response_object  = undo()
+    if response_object is False:
+        return response('Nothing to undo')
+    variable_name = response_object[0]
+    new_value = response_object[1]
+    return response(str(variable_name) + ' = ' + str(new_value))
+
 
 if __name__ == '__main__':
     # This is used when running locally only. When deploying to Google App

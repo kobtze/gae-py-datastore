@@ -33,9 +33,10 @@ class Database:
         return result
 
     def clean(self):
-        query = client.query()
+        query = client.query()  
         # query.keys_only()
         entries = list(query.fetch())
+        # print('entries: ', entries)
         # Only case where time complexity is O(n)
         result = client.delete_multi(entries)
         return result
