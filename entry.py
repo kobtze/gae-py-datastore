@@ -1,53 +1,53 @@
-from google.cloud import datastore
-import datetime
+from database import Database
+# import json
 
-KIND = 'Entry'
-client = datastore.Client(project='fs-py-datastore')
-
+db = Database()
 
 def get_entry(name):
-    key = client.key(KIND, name)
-    entry = client.get(key)
-    return entry
-
+    return db.get('Entry', name)
 
 def set_entry(name, value):
-    complete_key = client.key(KIND, name)
-    # TODO: add reverse mechanism
-    # 0. call get
-    # 1. if current name exists => add set_backwards obj {name, value} to Commands
-    # 2. else => add unset
-    entry = datastore.Entity(key=complete_key)
-    entry.update({'value': value})
-    result = client.put(entry)
-    return result
-
+    # Get previous val
+    # prevalue = get_entry(name)
+    db.set('Entry', name, value)
+    # Insert command to done stack in DB:
 
 def unset_entry(name):
-    # TODO: add reverse mechanism
-    # 0: call get
-    # 1. if exists => add set_backwards
-    # 2. else => add set_backwards(null)
-    complete_key = client.key(KIND, name)
-    result = client.delete(complete_key)
-    return result
-
+    prev = db.get('Entry', name)
+    if prev is None:
+        return False
+    else:
+        db.delete_one('Entry', name)
+        return True
 
 def num_equal_to(value):
-    query = client.query(kind=KIND)
-    query.keys_only()
-    query.add_filter('value', '=', value)
-    results = list(query.fetch())
-    num = (len(results))
-    return num
-
+    results = db.query_by_value('Entry', value)
+    return len(results)
 
 def clean():
-    # Query entire DB
-    query = client.query()
-    query.keys_only()
-    # Fetch
-    entries = list(query.fetch())
-    # Only case where time complexity is O(n)
-    result = client.delete_multi(entries)
-    return result
+    return db.clean()
+
+# def append_cmd(stack_name, cmd):
+#     entity = db.get('Length', stack_name)
+#     index = entity['value']
+#     print('index:', index)
+#     if index is None:
+#         index = 0
+#     print('index:', index)
+#     # increment index
+#     index += 1
+#     print('index:', index)
+#     # db.set('Length', stack_name, index)
+#     # db.set(stack_name, index, json.dumps(cmd))
+#     # return index
+
+# def pop_cmd(stack_name):
+#     index = db.get('Length', stack_name)
+#     cmd = db.get(stack_name, index)
+#     # decrement index:
+#     index -= 1
+#     db.set('Length', stack_name, index)
+#     return cmd
+
+# clean()
+# append_cmd('Undo', ('set', 'a', '1', None))

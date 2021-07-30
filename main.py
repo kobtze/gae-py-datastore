@@ -15,6 +15,8 @@ def response(string):
 @app.route('/get')
 def get():
     name = request.args.get('name')
+    if ' ' in name:
+        return response('Inputs cannot contain spaces')
     result = get_entry(name)
     print(result)
     if result is not None and result['value'] is not None:
@@ -27,6 +29,8 @@ def get():
 def set():
     name = request.args.get('name')
     value = request.args.get('value')
+    if ' ' in name or ' ' in value:
+        return response('Inputs cannot contain spaces')
     try:
         set_entry(name, value)
     except:
@@ -38,8 +42,12 @@ def set():
 @app.route('/unset')
 def unset():
     name = request.args.get('name')
+    if ' ' in name:
+        return response('Inputs cannot contain spaces')
     try:
-        unset_entry(name)
+        succeeded = unset_entry(name)
+        if succeeded is False:
+            return response('Value does not exist')
     except:
         return response('some error occurred')
     else:
@@ -49,6 +57,8 @@ def unset():
 @app.route('/numequalto')
 def numequalto():
     value = request.args.get('value')
+    if ' ' in value:
+        return response('Inputs cannot contain spaces')
     result = num_equal_to(value)
     return response(str(result))
 
